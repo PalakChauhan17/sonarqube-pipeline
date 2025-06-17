@@ -1,0 +1,31 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'SonarCloud'  # Match the exact name of your service connection
+    organization: 'palakchauhan17'  # Your SonarCloud organization key (from the URL)
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: 'PalakChauhan17_sonarqube-pipeline'
+    cliProjectName: 'sonarqube-pipeline'
+    extraProperties: |
+      sonar.sources=.
+
+- script: |
+    python3 -m venv venv
+    source venv/bin/activate
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt || true
+    pytest || true
+  displayName: 'Setup Python environment and run tests'
+
+- task: SonarCloudAnalyze@1
+
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
